@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">JapaShloka</string>
+    <string name="title_activity_main">JapaShloka</string>
+    <string name="package_name">io.ionic.JapaShloka</string>
+    <string name="custom_url_scheme">io.ionic.JapaShloka</string>
+</resources>

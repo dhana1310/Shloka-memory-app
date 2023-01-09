@@ -1,17 +1,32 @@
 {
-  "name": "my-react-app",
+  "name": "japashloka",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@capacitor/android": "4.6.1",
+    "@capacitor/core": "^4.6.1",
+    "@emotion/react": "^11.10.5",
+    "@emotion/styled": "^11.10.5",
+    "@mui/icons-material": "^5.11.0",
+    "@mui/material": "^5.11.0",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "bootstrap": "^5.2.3",
+    "file-saver": "^2.0.5",
+    "react": "^18.1.0",
+    "react-dom": "^18.1.0",
+    "react-native": "^0.70.6",
+    "react-native-web": "^0.18.10",
+    "react-router-dom": "^6.4.4",
     "react-scripts": "5.0.1",
+    "serve": "^14.1.2",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
+    "webPackDev": "webpack serve",
+    "webPackBuild": "webpack",
+    "android": "rmdir /s /q android && npm run build && ionic capacitor add android && git restore android/app/ && npx cap open android",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
@@ -34,5 +49,16 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@babel/core": "^7.20.5",
+    "@babel/preset-env": "^7.20.2",
+    "@babel/preset-react": "^7.18.6",
+    "@capacitor/cli": "^4.6.1",
+    "babel-loader": "^9.1.0",
+    "html-webpack-plugin": "^5.5.0",
+    "webpack": "^5.75.0",
+    "webpack-cli": "^5.0.1",
+    "webpack-dev-server": "^4.11.1"
   }
 }
