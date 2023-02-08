@@ -1,0 +1,7 @@
+{
+    "name": "JapaShloka",
+    "integrations": {
+        "capacitor": {}
+    },
+    "type": "react"
+}
