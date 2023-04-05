@@ -24,55 +24,128 @@ const DisplayGita = () => {
   const [displayRandomShlokaNumber, setDisplayRandomShlokaNumber] = useState("");
   const [displayShlokaFlag, setDisplayShlokaFlag] = useState(false);
   const [displayShlokaNumberButtonFlag, setDisplayShlokaNumberButtonFlag] = useState(true);
-  const [flowType, setFlowType] = useState(true);
+  const [randomFlow, setRandomFlow] = useState(false);
   const [shlokaFontSize, setShlokaFontSize] = useState(25);
   const [selectBooks, setSelectBooks] = useState([]);
-  const [progressTotalSize, setProgressTotalSize] = useState(100);
+  const [progressTotalSize, setProgressTotalSize] = useState(10000);
   const [progressCurrentSize, setProgressCurrentSize] = useState(0);
   const [showToast, setShowToast] = useState(populateToast(false, "success", "Success", "Your data is saved.", "20%"));
 
   useEffect(() => {
     var displayUiStateObject = savedDisplayUiState;
     var localSelectBooks = selectBooks.length > 0 ? selectBooks : getDefaultBooksList();
+    var localDisplayRandomShlokaNumber = displayRandomShlokaNumber;
+    var localDisplayShlokaNumberButtonFlag = displayShlokaNumberButtonFlag;
+    var localAllSelectedShlokasFromResponse = [];
+    var localAllDeselectedShlokasFromResponse = [];
+    var localProgressCurrentSize = progressCurrentSize;
+    var localProgressTotalSize = progressTotalSize;
+    var localRandomFlow = randomFlow;
     if (localStorage.getItem("savedDisplayUiState") !== null) {
       displayUiStateObject = JSON.parse(localStorage.getItem("savedDisplayUiState"));
+      console.log(JSON.stringify(savedDisplayUiState));
       setShlokaFontSize(displayUiStateObject.shlokaFontSize ? displayUiStateObject.shlokaFontSize : 25);
       localSelectBooks.forEach((book) => {
         book.isSelected = displayUiStateObject.currentSelectedBooks.includes(book.bookShortCode);
       });
-      setFlowType(displayUiStateObject.flowType);
+      if (displayUiStateObject.displayRandomShlokaNumber) {
+        localDisplayRandomShlokaNumber = displayUiStateObject.displayRandomShlokaNumber;
+      }
+
+      if (displayUiStateObject.allShlokaNumbers) {
+        localAllSelectedShlokasFromResponse = displayUiStateObject.allShlokaNumbers;
+      }
+      if (displayUiStateObject.deselectedShlokaNumbers) {
+        localAllDeselectedShlokasFromResponse = displayUiStateObject.deselectedShlokaNumbers;
+      }
+      if (displayUiStateObject.progressCurrentSize) {
+        localProgressCurrentSize = displayUiStateObject.progressCurrentSize;
+      }
+      if (displayUiStateObject.progressTotalSize) {
+        localProgressTotalSize = displayUiStateObject.progressTotalSize;
+      }
+      localRandomFlow = displayUiStateObject.randomFlow;
       setSavedDisplayUiState(displayUiStateObject);
     }
-    setSelectBooks([...localSelectBooks]);
 
     if (memorisedShlokas.error === errorCode) {
-      setDisplayShlokaNumberButtonFlag(false);
+      localDisplayShlokaNumberButtonFlag = false;
       setShowToast(populateToast(true, "error", "Error", errorCode, "100%"));
     } else {
-      setDisplayShlokaNumberButtonFlag(true);
+      // setDisplayShlokaNumberButtonFlag(true);
     }
-    const [allSelectedShlokasFromResponse, allDeselectedShlokasFromResponse] = parseResponse(memorisedShlokas, displayUiStateObject);
-    setAllShlokaNumbers(Array.from(new Set(allSelectedShlokasFromResponse)));
-    setDeselectedShlokaNumbers(Array.from(new Set(allDeselectedShlokasFromResponse)));
+    if (localAllSelectedShlokasFromResponse.length === 0) {
+      const [allSelectedShlokasFromResponse, allDeselectedShlokasFromResponse] = parseResponse(memorisedShlokas, displayUiStateObject);
+      localAllSelectedShlokasFromResponse = Array.from(new Set(allSelectedShlokasFromResponse));
+      localAllDeselectedShlokasFromResponse = Array.from(new Set(allDeselectedShlokasFromResponse));
+    }
+    saveAllShlokaNumbers(
+      localAllSelectedShlokasFromResponse,
+      localAllDeselectedShlokasFromResponse,
+      localDisplayRandomShlokaNumber,
+      localDisplayShlokaNumberButtonFlag,
+      localProgressCurrentSize,
+      localProgressTotalSize,
+      localRandomFlow,
+      localSelectBooks
+    );
+    // setProgressTotalSize(localProgressTotalSize);
     setOriginalResponse(memorisedShlokas);
-    setProgressTotalSize(allShlokaNumbers.length > 0 ? allShlokaNumbers.length : 100);
   }, [memorisedShlokas]);
 
-  useEffect(() => {
-    setProgressTotalSize(allShlokaNumbers.length > 0 ? allShlokaNumbers.length : 100);
-  }, [allShlokaNumbers]);
+  // useEffect(() => {
+  //   setProgressTotalSize(allShlokaNumbers.length > 0 ? allShlokaNumbers.length : 100);
+  // }, [allShlokaNumbers]);
 
   const onTimeLineChange = (event) => {
     const name = event.target.value;
     var displayUiStateObject = getDefaultTimeLineName(name);
-    saveDisplayUiState(displayUiStateObject, selectBooks);
     const [allSelectedShlokasFromResponse, allDeselectedShlokasFromResponse] = parseResponse(memorisedShlokas, displayUiStateObject);
-    setAllShlokaNumbers(Array.from(new Set(allSelectedShlokasFromResponse)));
-    setDeselectedShlokaNumbers(Array.from(new Set(allDeselectedShlokasFromResponse)));
+    saveDisplayUiState(displayUiStateObject, selectBooks, Array.from(new Set(allSelectedShlokasFromResponse)), Array.from(new Set(allDeselectedShlokasFromResponse)));
     resetTheUiComponent(displayUiStateObject);
   };
 
-  function saveDisplayUiState(displayUiStateObject, selectBooks) {
+  function saveAllShlokaNumbers(
+    allShlokaNumbers,
+    deselectedShlokaNumbers,
+    displayRandomShlokaNumber,
+    displayShlokaNumberButtonFlag,
+    progressCurrentSize,
+    progressTotalSize,
+    randomFlow,
+    localSelectBooks
+  ) {
+    savedDisplayUiState.deselectedShlokaNumbers = deselectedShlokaNumbers;
+    savedDisplayUiState.allShlokaNumbers = allShlokaNumbers;
+    savedDisplayUiState.displayRandomShlokaNumber = displayRandomShlokaNumber;
+    savedDisplayUiState.displayShlokaNumberButtonFlag = displayShlokaNumberButtonFlag;
+    savedDisplayUiState.progressCurrentSize = progressCurrentSize;
+    savedDisplayUiState.progressTotalSize = progressTotalSize;
+    savedDisplayUiState.randomFlow = randomFlow;
+    var currentSelectedBooks = [];
+    localSelectBooks.forEach((selectBook, index) => {
+      if (selectBook.isSelected) {
+        currentSelectedBooks.push(selectBook.bookShortCode);
+      }
+    });
+    savedDisplayUiState.currentSelectedBooks = currentSelectedBooks;
+
+    console.log("Here 2 => " + progressCurrentSize + "/" + progressTotalSize);
+
+    setSelectBooks([...localSelectBooks]);
+    setRandomFlow(randomFlow);
+    setProgressCurrentSize(progressCurrentSize <= progressTotalSize ? progressCurrentSize : 0);
+    setProgressTotalSize(progressTotalSize === 10000 ? allShlokaNumbers.length : progressTotalSize);
+    setDisplayShlokaNumberButtonFlag(displayShlokaNumberButtonFlag);
+    setDisplayRandomShlokaNumber(displayRandomShlokaNumber);
+    setAllShlokaNumbers(allShlokaNumbers);
+    setDeselectedShlokaNumbers(deselectedShlokaNumbers);
+    populateShlokaTextToDisplay(displayRandomShlokaNumber);
+    console.log(JSON.stringify(savedDisplayUiState));
+    localStorage.setItem("savedDisplayUiState", JSON.stringify(savedDisplayUiState));
+  }
+
+  function saveDisplayUiState(displayUiStateObject, selectBooks, allShlokaNumbers, deselectedShlokaNumbers) {
     var currentSelectedBooks = [];
     selectBooks.forEach((selectBook, index) => {
       if (selectBook.isSelected) {
@@ -80,7 +153,11 @@ const DisplayGita = () => {
       }
     });
     displayUiStateObject.currentSelectedBooks = currentSelectedBooks;
-    displayUiStateObject.flowType = flowType;
+    displayUiStateObject.randomFlow = randomFlow;
+    displayUiStateObject.deselectedShlokaNumbers = deselectedShlokaNumbers;
+    displayUiStateObject.allShlokaNumbers = allShlokaNumbers;
+    setAllShlokaNumbers(allShlokaNumbers);
+    setDeselectedShlokaNumbers(deselectedShlokaNumbers);
     setSavedDisplayUiState(displayUiStateObject);
     localStorage.setItem("savedDisplayUiState", JSON.stringify(displayUiStateObject));
   }
@@ -92,11 +169,8 @@ const DisplayGita = () => {
         localDefaultShlokas.splice(localDefaultShlokas.indexOf(deselectedShlokaNumber), 1);
       }
     });
-    setAllShlokaNumbers(localDefaultShlokas);
-    setProgressCurrentSize(0);
-    setProgressTotalSize(localDefaultShlokas.length);
+    saveAllShlokaNumbers(localDefaultShlokas, deselectedShlokaNumbers, displayRandomShlokaNumber, true, 0, progressTotalSize, randomFlow, selectBooks);
     setDisplayRandomShlokaNumber("");
-    setDisplayShlokaNumberButtonFlag(localDefaultShlokas.length > 0);
     setDisplayShlokaFlag(false);
   }
 
@@ -105,37 +179,39 @@ const DisplayGita = () => {
       setShowToast(populateToast(true, "info", "Info", "All shlokas done, refreshing", "100%"));
       resetTheUiComponent(savedDisplayUiState);
     } else {
-      const index = flowType ? Math.floor(Math.random() * allShlokaNumbers.length) : 0;
+      const index = randomFlow ? Math.floor(Math.random() * allShlokaNumbers.length) : 0;
       // setRandomNumber(ran);
       var nextShloka = allShlokaNumbers[index];
-      setDisplayRandomShlokaNumber(nextShloka);
-
-      var fileToLoad = "";
-      if (nextShloka.startsWith("BG ")) {
-        fileToLoad = "/" + nextShloka.substring(0, 2) + "/" + nextShloka.split(".")[0].substring(3) + ".txt";
-      } else if (nextShloka.startsWith("SB ")) {
-        fileToLoad = "/" + nextShloka.substring(0, 2) + "/" + nextShloka.split(".")[0].substring(3) + "/" + nextShloka.split(".")[1] + ".txt";
-      } else if (nextShloka.startsWith("CC ")) {
-        fileToLoad = "/" + nextShloka.substring(0, 2) + "/" + nextShloka.split(".")[0].substring(3).split(" ")[0] + "/" + nextShloka.split(".")[0].split(" ")[2] + ".txt";
-      }
-
-      fetch(fileToLoad)
-        .then((r) => r.text())
-        .then((text) => {
-          const splitLines = text.split("\n");
-          setAllShlokasLinesFromText(Array.from(splitLines.map((line) => line + "\n")));
-        });
-      setProgressCurrentSize(progressCurrentSize + 1);
+      // setDisplayRandomShlokaNumber(nextShloka);
+      populateShlokaTextToDisplay(nextShloka);
+      deselectedShlokaNumbers.push(nextShloka);
       allShlokaNumbers.splice(index, 1);
-      setAllShlokaNumbers(allShlokaNumbers);
+      saveAllShlokaNumbers(allShlokaNumbers, deselectedShlokaNumbers, nextShloka, true, progressCurrentSize + 1, progressTotalSize, randomFlow, selectBooks);
     }
     setDisplayShlokaFlag(false);
     setDisplayOneShloka([]);
   };
 
+  function populateShlokaTextToDisplay(nextShloka) {
+    var fileToLoad = "";
+    if (nextShloka.startsWith("BG ")) {
+      fileToLoad = "/" + nextShloka.substring(0, 2) + "/" + nextShloka.split(".")[0].substring(3) + ".txt";
+    } else if (nextShloka.startsWith("SB ")) {
+      fileToLoad = "/" + nextShloka.substring(0, 2) + "/" + nextShloka.split(".")[0].substring(3) + "/" + nextShloka.split(".")[1] + ".txt";
+    } else if (nextShloka.startsWith("CC ")) {
+      fileToLoad = "/" + nextShloka.substring(0, 2) + "/" + nextShloka.split(".")[0].substring(3).split(" ")[0] + "/" + nextShloka.split(".")[0].split(" ")[2] + ".txt";
+    }
+
+    fetch(fileToLoad)
+      .then((r) => r.text())
+      .then((text) => {
+        const splitLines = text.split("\n");
+        setAllShlokasLinesFromText(Array.from(splitLines.map((line) => line + "\n")));
+      });
+  }
+
   const handleDisplayButton = () => {
     displayOneShloka.splice(0, displayOneShloka.length);
-    setDisplayOneShloka(displayOneShloka);
     var temp = false;
     var onlyShlokaNumber = "";
     var displayMulitpleShlokaNumbers = "";
@@ -180,6 +256,7 @@ const DisplayGita = () => {
         break;
       }
     }
+    setDisplayOneShloka([...displayOneShloka]);
     setDisplayShlokaFlag(!displayShlokaFlag);
   };
 
@@ -217,25 +294,35 @@ const DisplayGita = () => {
     });
     saveDisplayUiState(savedDisplayUiState, selectBooks);
     setSelectBooks([...selectBooks]);
+
     var localAllShlokaNumbers = allShlokaNumbers;
     var localDeselectedShlokaNumbers = deselectedShlokaNumbers;
-    // console.log(event.target.id + "=" + event.target.checked);
     if (!event.target.checked) {
       shuffleShlokaNumbers(localAllShlokaNumbers, event.target.id, localDeselectedShlokaNumbers);
     } else {
       shuffleShlokaNumbers(localDeselectedShlokaNumbers, event.target.id, localAllShlokaNumbers);
     }
-    setAllShlokaNumbers(localAllShlokaNumbers);
-    setDeselectedShlokaNumbers(localDeselectedShlokaNumbers);
-    setDisplayShlokaNumberButtonFlag(localAllShlokaNumbers.length > 0);
-    setProgressTotalSize(localAllShlokaNumbers.length > 0 ? localAllShlokaNumbers.length : 100);
-    setProgressCurrentSize(0);
+    console.log("all shloka = " + localAllShlokaNumbers);
+    console.log("all deshloka = " + localDeselectedShlokaNumbers);
+    var totalProgressSize = localAllShlokaNumbers.length > 0 ? localAllShlokaNumbers.length : 100;
+    saveAllShlokaNumbers(
+      localAllShlokaNumbers,
+      localDeselectedShlokaNumbers,
+      displayRandomShlokaNumber,
+      localAllShlokaNumbers.length > 0,
+      0,
+      totalProgressSize,
+      randomFlow,
+      selectBooks
+    );
+    // setProgressTotalSize(localAllShlokaNumbers.length > 0 ? localAllShlokaNumbers.length : 100);
   };
 
-  const flowTypeClick = () => {
+  const randomFlowClick = () => {
     var localSavedDisplayUiState = savedDisplayUiState;
-    localSavedDisplayUiState.flowType = !flowType;
-    setFlowType(!flowType);
+    localSavedDisplayUiState.randomFlow = !randomFlow;
+    setRandomFlow(!randomFlow);
+    console.log(JSON.stringify(localSavedDisplayUiState));
     setSavedDisplayUiState(localSavedDisplayUiState);
     localStorage.setItem("savedDisplayUiState", JSON.stringify(localSavedDisplayUiState));
   };
@@ -296,9 +383,9 @@ const DisplayGita = () => {
           ))}
         </Select>
       </FormControl>
-      <div key="flowType">
+      <div key="randomFlow">
         <label style={{ fontWeight: "bold", fontSize: "20px" }}>
-          <GreenSwitch type="checkbox" id="flowType" checked={flowType} onChange={flowTypeClick} />
+          <GreenSwitch type="checkbox" id="randomFlow" checked={randomFlow} onChange={randomFlowClick} />
           Random
         </label>
         <br />
@@ -316,7 +403,7 @@ const DisplayGita = () => {
       </Box>
       <br />
       <Button variant="contained" color="success" onClick={viewRandomShloka} disabled={!displayShlokaNumberButtonFlag}>
-        View shloka
+        View shloka number
       </Button>
       <br />
       {displayRandomShlokaNumber ? (
@@ -359,7 +446,7 @@ const DisplayGita = () => {
           onClick={handleDisplayButton}
           disabled={!displayRandomShlokaNumber}
         >
-          {displayShlokaFlag ? "Hide the shloka" : "Display the shloka"}
+          {displayShlokaFlag ? "Hide the shloka" : "Display full shloka"}
         </Button>
       </a>
       <br />

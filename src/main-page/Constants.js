@@ -1,7 +1,7 @@
 export const errorCode = "Please add the shlokas first!!";
 
 export const defaultSelectedBooks = ["BG", "SB", "CC"];
-export const defaultUiState = { timeLineName: "All time", numOfDays: 35000, currentSelectedBooks: defaultSelectedBooks, flowType: true, shlokaFontSize : 25 };
+export const defaultUiState = { timeLineName: "All time", numOfDays: 35000, currentSelectedBooks: defaultSelectedBooks, randomFlow: true, shlokaFontSize : 25 };
 export const createSequenceList = (lastNumber) =>
   Array(lastNumber)
     .fill()
@@ -27,12 +27,12 @@ export const getDefaultBooksList = () => {
 
 export const getDefaultTimeList = () => {
   return [
-    { timeLineName: "1 week", numOfDays: 7, currentSelectedBooks: defaultSelectedBooks, flowType: true },
-    { timeLineName: "2 weeks", numOfDays: 14, currentSelectedBooks: defaultSelectedBooks, flowType: true },
-    { timeLineName: "1 month", numOfDays: 30, currentSelectedBooks: defaultSelectedBooks, flowType: true },
-    { timeLineName: "2 months", numOfDays: 60, currentSelectedBooks: defaultSelectedBooks, flowType: true },
-    { timeLineName: "6 months", numOfDays: 180, currentSelectedBooks: defaultSelectedBooks, flowType: true },
-    { timeLineName: "1 year", numOfDays: 365, currentSelectedBooks: defaultSelectedBooks, flowType: true },
+    { timeLineName: "1 week", numOfDays: 7, currentSelectedBooks: defaultSelectedBooks, randomFlow: true },
+    { timeLineName: "2 weeks", numOfDays: 14, currentSelectedBooks: defaultSelectedBooks, randomFlow: true },
+    { timeLineName: "1 month", numOfDays: 30, currentSelectedBooks: defaultSelectedBooks, randomFlow: true },
+    { timeLineName: "2 months", numOfDays: 60, currentSelectedBooks: defaultSelectedBooks, randomFlow: true },
+    { timeLineName: "6 months", numOfDays: 180, currentSelectedBooks: defaultSelectedBooks, randomFlow: true },
+    { timeLineName: "1 year", numOfDays: 365, currentSelectedBooks: defaultSelectedBooks, randomFlow: true },
     defaultUiState,
   ];
 };
