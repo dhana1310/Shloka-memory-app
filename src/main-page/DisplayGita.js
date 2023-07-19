@@ -1,19 +1,18 @@
-import { Box, Button, Card, FormControl, IconButton, InputLabel, LinearProgress, MenuItem, Paper, Select, Switch, Typography } from "@mui/material";
+import { Box, Button, Card, FormControl, IconButton, InputLabel, LinearProgress, MenuItem, Paper, Select, Typography } from "@mui/material";
 import { useState, useEffect } from "react";
 import { defaultUiState, errorCode, getDefaultBooksList, getDefaultTimeLineName, getDefaultTimeList, populateToast } from "./Constants";
 import parseResponse from "./ParseResponse";
 import useFetchMemorisedShlokas from "./useFetchMemorisedShlokas";
-import { alpha, styled } from "@mui/material/styles";
-import { green } from "@mui/material/colors";
 import ShowToast from "./ShowToast";
 import { useNavigate } from "react-router-dom";
 import { TextDecrease, TextIncrease } from "@mui/icons-material";
+import GreenSwitch from "./GreenSwitch";
 
 const DisplayGita = () => {
   const memorisedShlokas = useFetchMemorisedShlokas();
 
   const [allShlokasLinesFromText, setAllShlokasLinesFromText] = useState(["loading..."]);
-  const [displayOneShloka, setDisplayOneShloka] = useState([]);
+  const [displayOneShlokaText, setDisplayOneShlokaText] = useState([]);
   const [originalResponse, setOriginalResponse] = useState({});
   const [savedDisplayUiState, setSavedDisplayUiState] = useState(defaultUiState);
   var defaultShlokas = Array.from(new Set(parseResponse(originalResponse, savedDisplayUiState)[0]));
@@ -130,12 +129,12 @@ const DisplayGita = () => {
       setAllShlokaNumbers(allShlokaNumbers);
     }
     setDisplayShlokaFlag(false);
-    setDisplayOneShloka([]);
+    setDisplayOneShlokaText([]);
   };
 
   const handleDisplayButton = () => {
-    displayOneShloka.splice(0, displayOneShloka.length);
-    setDisplayOneShloka(displayOneShloka);
+    displayOneShlokaText.splice(0, displayOneShlokaText.length);
+    setDisplayOneShlokaText(displayOneShlokaText);
     var temp = false;
     var onlyShlokaNumber = "";
     var displayMulitpleShlokaNumbers = "";
@@ -171,10 +170,10 @@ const DisplayGita = () => {
           .startsWith("texts " + onlyShlokaNumber);
       if (check || multipleCheck) {
         temp = true;
-        displayOneShloka.push(multipleCheck ? displayMulitpleShlokaNumbers : displayRandomShlokaNumber);
+        displayOneShlokaText.push(multipleCheck ? displayMulitpleShlokaNumbers : displayRandomShlokaNumber);
         continue;
       } else if (temp && !allShlokasLinesFromText[k].toLowerCase().startsWith("text")) {
-        displayOneShloka.push(allShlokasLinesFromText[k]);
+        displayOneShlokaText.push(allShlokasLinesFromText[k]);
       }
       if (temp && allShlokasLinesFromText[k].toLowerCase().startsWith("text")) {
         break;
@@ -261,18 +260,6 @@ const DisplayGita = () => {
     setSavedDisplayUiState(localSavedDisplayUiState);
     localStorage.setItem("savedDisplayUiState", JSON.stringify(localSavedDisplayUiState));
   }
-
-  const GreenSwitch = styled(Switch)(({ theme }) => ({
-    "& .MuiSwitch-switchBase.Mui-checked": {
-      color: green[900],
-      "&:hover": {
-        backgroundColor: alpha(green[900], theme.palette.action.hoverOpacity),
-      },
-    },
-    "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
-      backgroundColor: green[900],
-    },
-  }));
 
   return (
     <div style={{ marginTop: "20px" }}>
@@ -390,7 +377,7 @@ const DisplayGita = () => {
           </div>
           <br />
           <br />
-          {displayOneShloka.map((line) => (
+          {displayOneShlokaText.map((line) => (
             <ParaDisplay key={Math.random()} line={line} />
           ))}
         </Paper>

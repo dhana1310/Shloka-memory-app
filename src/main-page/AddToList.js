@@ -7,15 +7,19 @@ import { shlokaList, createSequenceList, defaultCurrentSelectedDetails, getDefau
 import ChipsArray from "./ChipsArray";
 import { Button, Checkbox, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import ShowToast from "./ShowToast";
+import GreenSwitch from "./GreenSwitch";
 
 const AddToList = () => {
   const memorisedShlokas = useFetchMemorisedShlokas();
   const [totalChaptersList, setTotalChaptersList] = useState([]);
   const [totalCantosList, setTotalCantosList] = useState([]);
   const [totalShlokaList, setTotalShlokaList] = useState([]);
+  const [totalShlokaListWithText, setTotalShlokaListWithText] = useState([]);
   const [totalSelectedShlokaList, setTotalSelectedShlokaList] = useState([]);
   const [currentSelectedDetails, setCurrentSelectedDetails] = useState(defaultCurrentSelectedDetails);
   const [showToast, setShowToast] = useState(populateToast(false, "error", "Error", "Unable to fetch the existing shlokas!!", "100%"));
+  const [allShlokasLinesFromText, setAllShlokasLinesFromText] = useState(["loading..."]);
+  const [languageSwitch, setLanguageSwitch] = useState(false);
   const { shortCode } = useParams();
   const history = useNavigate();
 
@@ -60,6 +64,7 @@ const AddToList = () => {
   const onBookChange = (event) => {
     setTotalChaptersList([]);
     setTotalShlokaList([]);
+    setTotalShlokaListWithText([]);
     setTotalCantosList([]);
     // const selectedIndex = event.target.options.selectedIndex;
     // const shortCode = event.target.options[selectedIndex].getAttribute("data-key");
@@ -74,6 +79,7 @@ const AddToList = () => {
   const onCantoChange = (event) => {
     setTotalChaptersList([]);
     setTotalShlokaList([]);
+    setTotalShlokaListWithText([]);
     // const selectedIndex = e.target.options.selectedIndex;
     // const cantoShortCode = e.target.options[selectedIndex].getAttribute("data-key");
     const cantoShortCode = event.target.value.toString();
@@ -95,7 +101,7 @@ const AddToList = () => {
                 if (shloka.cantosList.filter((canto) => canto.cantoNumber === cantoShortCode).length === 0) {
                   shloka.cantosList.push({ cantoNumber: cantoShortCode, chaptersList: [] });
                 }
-                shloka.cantosList.sort((a,b) => a.cantoNumber - b.cantoNumber);
+                shloka.cantosList.sort((a, b) => a.cantoNumber - b.cantoNumber);
               });
 
             setCurrentSelectedDetails(currentSelectedDetails);
@@ -107,9 +113,11 @@ const AddToList = () => {
 
   const onChapterChange = (event) => {
     setTotalShlokaList([]);
+    setTotalShlokaListWithText([]);
     // const selectedIndex = e.target.options.selectedIndex;
     // const shortCode = e.target.options[selectedIndex].getAttribute("data-key");
     currentSelectedDetails.onScreenCurrentChapterNumber = event.target.value.toString();
+    loadAllShloka(currentSelectedDetails);
     shlokaList
       .filter((selectedBook) => selectedBook.bookShortCode === currentSelectedDetails.onScreenCurrentBook)
       .forEach((selectedBook) => {
@@ -118,6 +126,7 @@ const AddToList = () => {
             .filter((chapter) => chapter.chapterNumber === currentSelectedDetails.onScreenCurrentChapterNumber)
             .forEach((chapter) => {
               setTotalShlokaList(chapter.allShlokaCount);
+              // populateStartingShlokaText(chapter.allShlokaCount);
             });
 
           currentSelectedDetails.allShlokasList
@@ -126,7 +135,7 @@ const AddToList = () => {
               if (shloka.chaptersList.filter((chapter) => chapter.chapterNumber === currentSelectedDetails.onScreenCurrentChapterNumber).length === 0) {
                 shloka.chaptersList.push({ chapterNumber: currentSelectedDetails.onScreenCurrentChapterNumber, selectedShlokas: [] });
               }
-              shloka.chaptersList.sort((a,b) => a.chapterNumber - b.chapterNumber);
+              shloka.chaptersList.sort((a, b) => a.chapterNumber - b.chapterNumber);
             });
         } else if (currentSelectedDetails.onScreenCurrentBook === "SB" || currentSelectedDetails.onScreenCurrentBook === "CC") {
           selectedBook.cantosList
@@ -136,6 +145,7 @@ const AddToList = () => {
                 .filter((chapter) => chapter.chapterNumber === currentSelectedDetails.onScreenCurrentChapterNumber)
                 .forEach((chapter) => {
                   setTotalShlokaList(chapter.allShlokaCount);
+                  // populateStartingShlokaText(chapter.allShlokaCount);
                 });
             });
 
@@ -148,7 +158,7 @@ const AddToList = () => {
                   if (canto.chaptersList.filter((chapter) => chapter.chapterNumber === currentSelectedDetails.onScreenCurrentChapterNumber).length === 0) {
                     canto.chaptersList.push({ chapterNumber: currentSelectedDetails.onScreenCurrentChapterNumber, selectedShlokas: [] });
                   }
-                  canto.chaptersList.sort((a,b) => a.chapterNumber - b.chapterNumber);
+                  canto.chaptersList.sort((a, b) => a.chapterNumber - b.chapterNumber);
                 });
             });
         }
@@ -156,6 +166,79 @@ const AddToList = () => {
       });
 
     // history(`/addToList/${shortCode}`);
+  };
+
+  useEffect(() => {
+    populateStartingShlokaText();
+  }, [allShlokasLinesFromText, languageSwitch]);
+
+  const loadAllShloka = (currentSelectedDetails) => {
+    var fileToLoad = "";
+    if (currentSelectedDetails.onScreenCurrentBook === "BG") {
+      fileToLoad = "/BG" + "/" + currentSelectedDetails.onScreenCurrentChapterNumber + ".txt";
+    } else if (currentSelectedDetails.onScreenCurrentBook === "SB") {
+      fileToLoad = "/SB" + "/" + currentSelectedDetails.onScreenCurrentCanto + "/" + currentSelectedDetails.onScreenCurrentChapterNumber + ".txt";
+    } else if (currentSelectedDetails.onScreenCurrentBook === "CC") {
+      fileToLoad = "/CC" + "/" + currentSelectedDetails.onScreenCurrentCanto + "/" + currentSelectedDetails.onScreenCurrentChapterNumber + ".txt";
+    }
+
+    fetch(fileToLoad)
+      .then((r) => r.text())
+      .then((text) => {
+        const splitLines = text.split("\n");
+        setAllShlokasLinesFromText(Array.from(splitLines.map((line) => line + "\n")));
+      });
+  };
+
+  const populateStartingShlokaText = () => {
+    // setTotalShlokaListWithText([]);
+    var localTotalShlokaListWithText = [];
+    totalShlokaList.forEach((shlokaNumber) => {
+      var textNumberCrossed = false;
+      // var displayMulitpleShlokaNumbers = "";
+      for (let k = 0; k < allShlokasLinesFromText.length; k++) {
+        var multipleCheck = false;
+
+        if (allShlokasLinesFromText[k].trim().toLowerCase().startsWith("texts ")) {
+          var multipleShlokas = allShlokasLinesFromText[k].trim().toLowerCase().substring(6).split("-");
+          if (parseInt(multipleShlokas[0]) <= parseInt(shlokaNumber) && parseInt(shlokaNumber) <= parseInt(multipleShlokas[1])) {
+            multipleCheck = true;
+            // displayMulitpleShlokaNumbers = displayMulitpleShlokaNumbers + allShlokasLinesFromText[k].trim().toLowerCase().substring(6);
+          }
+        }
+
+        var check =
+          allShlokasLinesFromText[k]
+            .trim()
+            .toLowerCase()
+            .startsWith("text " + shlokaNumber) ||
+          allShlokasLinesFromText[k]
+            .trim()
+            .toLowerCase()
+            .startsWith("texts " + shlokaNumber);
+        if (check || multipleCheck) {
+          textNumberCrossed = true;
+          continue;
+        } else if (textNumberCrossed && !allShlokasLinesFromText[k].toLowerCase().startsWith("text")) {
+          var shlokaToDisplay = allShlokasLinesFromText[k];
+
+          if (languageSwitch && !(currentSelectedDetails.onScreenCurrentBook === "CC")) {
+            if (allShlokasLinesFromText[k - 1].toLowerCase().startsWith("text") && shlokaToDisplay.includes("वाच") && !shlokaToDisplay.includes("।")) {
+              shlokaToDisplay = shlokaToDisplay + allShlokasLinesFromText[k + 1];
+            }
+            localTotalShlokaListWithText.push({ shlokaNumber: shlokaNumber, shlokaStartingText: shlokaToDisplay });
+            break;
+          } else if (allShlokasLinesFromText[k].includes("a") || allShlokasLinesFromText[k].includes("ā")) {
+            if (shlokaToDisplay.includes(" uvāca")) {
+              shlokaToDisplay = shlokaToDisplay + allShlokasLinesFromText[k + 1];
+            }
+            localTotalShlokaListWithText.push({ shlokaNumber: shlokaNumber, shlokaStartingText: shlokaToDisplay });
+            break;
+          }
+        }
+      }
+    });
+    setTotalShlokaListWithText([...localTotalShlokaListWithText]);
   };
 
   const addRemoveShlokas = (event, chapter, shlokaValue) => {
@@ -174,7 +257,7 @@ const AddToList = () => {
         chapter.selectedShlokas.splice(index, 1);
       }
     }
-    chapter.selectedShlokas.sort((a,b) => a.shlokaNumber - b.shlokaNumber);
+    chapter.selectedShlokas.sort((a, b) => a.shlokaNumber - b.shlokaNumber);
   };
 
   const hasShloka = (selectedShlokas, id) => {
@@ -187,6 +270,10 @@ const AddToList = () => {
       }
     });
     return [isPresent, localIndex];
+  };
+
+  const languageSwitchClick = () => {
+    setLanguageSwitch(!languageSwitch);
   };
 
   const shlokaNumberSelection = (event) => {
@@ -316,39 +403,62 @@ const AddToList = () => {
               </FormControl>
             </div>
           )}
+          {totalShlokaListWithText.length > 0 && !(currentSelectedDetails.onScreenCurrentBook === "CC") ? (
+            <div className="row mt-3" key="language">
+              <label style={{ fontWeight: "bold", fontSize: "20px" }}>
+                <GreenSwitch type="checkbox" id="languageSwitch" checked={languageSwitch} name={"languageSwitch"} onChange={languageSwitchClick} />
+                Sanskrit
+              </label>
+              <br />
+            </div>
+          ) : (
+            ""
+          )}
+
           <form>
-            {totalShlokaList.map((shlokaNumber) => (
-              <div key={`${currentSelectedDetails.onScreenCurrentChapterNumber}.` + shlokaNumber}>
-                <label
-                  style={{
-                    // display: "inline-block",
-                    float: "left",
-                    marginLeft: "20px",
-                  }}
-                >
-                  <Checkbox
-                    type="checkbox"
-                    // id={`${shlokaNumber}`}
-                    id={`${shlokaNumber}`}
-                    name="vehicle1"
-                    checked={totalSelectedShlokaList.includes(
-                      currentSelectedDetails.onScreenCurrentBook +
-                        " " +
-                        (currentSelectedDetails.onScreenCurrentBook === "BG"
-                          ? ""
-                          : currentSelectedDetails.onScreenCurrentBook === "CC"
-                          ? currentSelectedDetails.onScreenCurrentCanto + " "
-                          : currentSelectedDetails.onScreenCurrentCanto + ".") +
-                        currentSelectedDetails.onScreenCurrentChapterNumber +
-                        "." +
-                        shlokaNumber
-                    )}
-                    onChange={shlokaNumberSelection}
-                  />
-                  {shlokaNumber}
-                </label>
-              </div>
-            ))}
+            <div
+              style={{
+                display: "block",
+                float: "left",
+              }}
+            >
+              {totalShlokaListWithText.map((shloka1) => (
+                <div key={`${currentSelectedDetails.onScreenCurrentChapterNumber}.` + shloka1.shlokaNumber}>
+                  <label
+                    style={{
+                      display: "block",
+                      float: "left",
+                      marginLeft: "0px",
+                      fontWeight: "bold",
+                      flexWrap: "nowrap",
+                      paddingLeft: 0,
+                      textAlign: "left",
+                    }}
+                  >
+                    <Checkbox
+                      type="checkbox"
+                      // id={`${shlokaNumber}`}
+                      id={`${shloka1.shlokaNumber}`}
+                      name="vehicle1"
+                      checked={totalSelectedShlokaList.includes(
+                        currentSelectedDetails.onScreenCurrentBook +
+                          " " +
+                          (currentSelectedDetails.onScreenCurrentBook === "BG"
+                            ? ""
+                            : currentSelectedDetails.onScreenCurrentBook === "CC"
+                            ? currentSelectedDetails.onScreenCurrentCanto + " "
+                            : currentSelectedDetails.onScreenCurrentCanto + ".") +
+                          currentSelectedDetails.onScreenCurrentChapterNumber +
+                          "." +
+                          shloka1.shlokaNumber
+                      )}
+                      onChange={shlokaNumberSelection}
+                    />
+                    {shloka1.shlokaNumber + " = " + shloka1.shlokaStartingText}
+                  </label>
+                </div>
+              ))}
+            </div>
           </form>
           <br />
         </div>
