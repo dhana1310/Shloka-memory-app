@@ -6,6 +6,7 @@ const useFetchMemorisedShlokas = () => {
 
   useEffect(() => {
     if(localStorage.getItem('savedShlokas') !== null) {
+      //console.log(localStorage.getItem('savedShlokas'));
       setMemorisedShlokas(JSON.parse(localStorage.getItem('savedShlokas')));
     } else {
       defaultCurrentSelectedDetails.error = errorCode;

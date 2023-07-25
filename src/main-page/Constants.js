@@ -1,6 +1,8 @@
 export const errorCode = "Please add the shlokas first!!";
 
-export const defaultSelectedBooks = ["BG", "SB", "CC"];
+export const defaultSelectedBooks = ["BG", "SB", "CC", "NOI", "BS", "ISO"];
+export const bookCodesWithoutCantos = Array.of("BG", "NOI", "BS", "ISO");
+export const bookCodesWithCantos = Array.of("SB", "CC");
 export const defaultUiState = { timeLineName: "All time", numOfDays: 35000, currentSelectedBooks: defaultSelectedBooks, flowType: true, shlokaFontSize : 25 };
 export const createSequenceList = (lastNumber) =>
   Array(lastNumber)
@@ -22,6 +24,9 @@ export const getDefaultBooksList = () => {
     { bookShortCode: "BG", bookName: "Bhagavad-gītā", isSelected: true },
     { bookShortCode: "SB", bookName: "Śrīmad-Bhāgavatam", isSelected: true },
     { bookShortCode: "CC", bookName: "Śrī Caitanya-caritāmṛta", isSelected: true },
+    { bookShortCode: "NOI", bookName: "Nectar of Instruction", isSelected: true },
+    { bookShortCode: "BS", bookName: "Brahma-saṁhitā", isSelected: true },
+    { bookShortCode: "ISO", bookName: "Śrī Īśopaniṣad", isSelected: true },
   ];
 };
 
@@ -99,6 +104,24 @@ export const defaultCurrentSelectedDetails = {
       chaptersList: [],
       cantosList: [],
     },
+    {
+      bookShortCode: "NOI",
+      bookName: "Nectar of Instruction",
+      chaptersList: [],
+      cantosList: [],
+    },
+    {
+      bookShortCode: "BS",
+      bookName: "Brahma-saṁhitā",
+      chaptersList: [],
+      cantosList: [],
+    },
+    {
+      bookShortCode: "ISO",
+      bookName: "Śrī Īśopaniṣad",
+      chaptersList: [],
+      cantosList: [],
+    }
   ],
 };
 
@@ -1825,6 +1848,39 @@ export const shlokaList = [
           },
         ],
       },
+    ],
+  },
+  {
+    bookShortCode: "NOI",
+    bookName: "Nectar of Instruction",
+    cantosList: [],
+    chaptersList: [
+      {
+        chapterNumber: "1",
+        allShlokaCount: createSequenceList(11),
+      }
+    ],
+  },
+  {
+    bookShortCode: "BS",
+    bookName: "Brahma-saṁhitā",
+    cantosList: [],
+    chaptersList: [
+      {
+        chapterNumber: "1",
+        allShlokaCount: createSequenceList(62),
+      }
+    ],
+  },
+  {
+    bookShortCode: "ISO",
+    bookName: "Śrī Īśopaniṣad",
+    cantosList: [],
+    chaptersList: [
+      {
+        chapterNumber: "1",
+        allShlokaCount: createSequenceList(18),
+      }
     ],
   },
 ];

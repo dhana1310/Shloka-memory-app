@@ -7,16 +7,20 @@ import ShowToast from "./ShowToast";
 import { useNavigate } from "react-router-dom";
 import { TextDecrease, TextIncrease } from "@mui/icons-material";
 import GreenSwitch from "./GreenSwitch";
+import OutlinedInput from "@mui/material/OutlinedInput";
+import ListItemText from "@mui/material/ListItemText";
+import Checkbox from "@mui/material/Checkbox";
 
 const DisplayGita = () => {
   const memorisedShlokas = useFetchMemorisedShlokas();
 
+  const [selectedBooksOnScreen, setSelectedBooksOnScreen] = useState([]);
   const [allShlokasLinesFromText, setAllShlokasLinesFromText] = useState(["loading..."]);
   const [displayOneShlokaText, setDisplayOneShlokaText] = useState([]);
   const [originalResponse, setOriginalResponse] = useState({});
   const [savedDisplayUiState, setSavedDisplayUiState] = useState(defaultUiState);
   var defaultShlokas = Array.from(new Set(parseResponse(originalResponse, savedDisplayUiState)[0]));
-  const [allShlokaNumbers, setAllShlokaNumbers] = useState(defaultShlokas);
+  const [selectedShlokaNumbers, setSelectedShlokaNumbers] = useState(defaultShlokas);
   const [deselectedShlokaNumbers, setDeselectedShlokaNumbers] = useState([]);
   const [timeLineList, setTimeLineList] = useState(getDefaultTimeList);
   // const [randomNumber, setRandomNumber] = useState(0);
@@ -43,6 +47,7 @@ const DisplayGita = () => {
       setSavedDisplayUiState(displayUiStateObject);
     }
     setSelectBooks([...localSelectBooks]);
+    setSelectedBooksOnScreen(displayUiStateObject.currentSelectedBooks);
 
     if (memorisedShlokas.error === errorCode) {
       setDisplayShlokaNumberButtonFlag(false);
@@ -51,22 +56,22 @@ const DisplayGita = () => {
       setDisplayShlokaNumberButtonFlag(true);
     }
     const [allSelectedShlokasFromResponse, allDeselectedShlokasFromResponse] = parseResponse(memorisedShlokas, displayUiStateObject);
-    setAllShlokaNumbers(Array.from(new Set(allSelectedShlokasFromResponse)));
+    setSelectedShlokaNumbers(Array.from(new Set(allSelectedShlokasFromResponse)));
     setDeselectedShlokaNumbers(Array.from(new Set(allDeselectedShlokasFromResponse)));
     setOriginalResponse(memorisedShlokas);
-    setProgressTotalSize(allShlokaNumbers.length > 0 ? allShlokaNumbers.length : 100);
+    setProgressTotalSize(selectedShlokaNumbers.length > 0 ? selectedShlokaNumbers.length : 100);
   }, [memorisedShlokas]);
 
   useEffect(() => {
-    setProgressTotalSize(allShlokaNumbers.length > 0 ? allShlokaNumbers.length : 100);
-  }, [allShlokaNumbers]);
+    setProgressTotalSize(selectedShlokaNumbers.length > 0 ? selectedShlokaNumbers.length : 100);
+  }, [selectedShlokaNumbers]);
 
   const onTimeLineChange = (event) => {
     const name = event.target.value;
     var displayUiStateObject = getDefaultTimeLineName(name);
     saveDisplayUiState(displayUiStateObject, selectBooks);
     const [allSelectedShlokasFromResponse, allDeselectedShlokasFromResponse] = parseResponse(memorisedShlokas, displayUiStateObject);
-    setAllShlokaNumbers(Array.from(new Set(allSelectedShlokasFromResponse)));
+    setSelectedShlokaNumbers(Array.from(new Set(allSelectedShlokasFromResponse)));
     setDeselectedShlokaNumbers(Array.from(new Set(allDeselectedShlokasFromResponse)));
     resetTheUiComponent(displayUiStateObject);
   };
@@ -91,7 +96,7 @@ const DisplayGita = () => {
         localDefaultShlokas.splice(localDefaultShlokas.indexOf(deselectedShlokaNumber), 1);
       }
     });
-    setAllShlokaNumbers(localDefaultShlokas);
+    setSelectedShlokaNumbers(localDefaultShlokas);
     setProgressCurrentSize(0);
     setProgressTotalSize(localDefaultShlokas.length);
     setDisplayRandomShlokaNumber("");
@@ -100,18 +105,20 @@ const DisplayGita = () => {
   }
 
   const viewRandomShloka = () => {
-    if (allShlokaNumbers.length === 0) {
+    if (selectedShlokaNumbers.length === 0) {
       setShowToast(populateToast(true, "info", "Info", "All shlokas done, refreshing", "100%"));
       resetTheUiComponent(savedDisplayUiState);
     } else {
-      const index = flowType ? Math.floor(Math.random() * allShlokaNumbers.length) : 0;
+      const index = flowType ? Math.floor(Math.random() * selectedShlokaNumbers.length) : 0;
       // setRandomNumber(ran);
-      var nextShloka = allShlokaNumbers[index];
+      var nextShloka = selectedShlokaNumbers[index];
       setDisplayRandomShlokaNumber(nextShloka);
 
       var fileToLoad = "";
-      if (nextShloka.startsWith("BG ")) {
+      if (nextShloka.startsWith("BG ") || nextShloka.startsWith("BS ")) {
         fileToLoad = "/" + nextShloka.substring(0, 2) + "/" + nextShloka.split(".")[0].substring(3) + ".txt";
+      } else if (nextShloka.startsWith("NOI ") || nextShloka.startsWith("ISO ")) {
+        fileToLoad = "/" + nextShloka.substring(0, 3) + "/" + nextShloka.split(".")[0].substring(4) + ".txt";
       } else if (nextShloka.startsWith("SB ")) {
         fileToLoad = "/" + nextShloka.substring(0, 2) + "/" + nextShloka.split(".")[0].substring(3) + "/" + nextShloka.split(".")[1] + ".txt";
       } else if (nextShloka.startsWith("CC ")) {
@@ -125,8 +132,8 @@ const DisplayGita = () => {
           setAllShlokasLinesFromText(Array.from(splitLines.map((line) => line + "\n")));
         });
       setProgressCurrentSize(progressCurrentSize + 1);
-      allShlokaNumbers.splice(index, 1);
-      setAllShlokaNumbers(allShlokaNumbers);
+      selectedShlokaNumbers.splice(index, 1);
+      setSelectedShlokaNumbers(selectedShlokaNumbers);
     }
     setDisplayShlokaFlag(false);
     setDisplayOneShlokaText([]);
@@ -138,7 +145,7 @@ const DisplayGita = () => {
     var temp = false;
     var onlyShlokaNumber = "";
     var displayMulitpleShlokaNumbers = "";
-    if (displayRandomShlokaNumber.startsWith("BG")) {
+    if (displayRandomShlokaNumber.startsWith("BG") || displayRandomShlokaNumber.startsWith("NOI") || displayRandomShlokaNumber.startsWith("BS") || displayRandomShlokaNumber.startsWith("ISO")) {
       displayMulitpleShlokaNumbers = displayRandomShlokaNumber.split(".")[0] + ".";
       onlyShlokaNumber = displayRandomShlokaNumber.toLowerCase().split(".")[1];
     } else if (displayRandomShlokaNumber.startsWith("SB")) {
@@ -187,6 +194,9 @@ const DisplayGita = () => {
       line.toLowerCase().startsWith("synonyms") ||
       line.toLowerCase().startsWith("translation") ||
       line.toLowerCase().startsWith("bg") ||
+      line.toLowerCase().startsWith("noi") ||
+      line.toLowerCase().startsWith("bs") ||
+      line.toLowerCase().startsWith("iso") ||
       line.toLowerCase().startsWith("sb") ||
       line.toLowerCase().startsWith("cc")
     ) {
@@ -209,25 +219,43 @@ const DisplayGita = () => {
   };
 
   const onBookSelection = (event) => {
+    const {
+      target: { value },
+    } = event;
+    setSelectedBooksOnScreen(
+      // On autofill we get a stringified value.
+      typeof value === "string" ? value.split(",") : value
+    );
     selectBooks.forEach((book) => {
-      if (book.bookShortCode === event.target.id) {
-        book.isSelected = !book.isSelected;
-      }
+      book.isSelected = value.includes(book.bookShortCode);
     });
     saveDisplayUiState(savedDisplayUiState, selectBooks);
     setSelectBooks([...selectBooks]);
-    var localAllShlokaNumbers = allShlokaNumbers;
-    var localDeselectedShlokaNumbers = deselectedShlokaNumbers;
+    var localSelectedShlokaNumbers = [];
+    var localDeselectedShlokaNumbers = [];
     // console.log(event.target.id + "=" + event.target.checked);
-    if (!event.target.checked) {
-      shuffleShlokaNumbers(localAllShlokaNumbers, event.target.id, localDeselectedShlokaNumbers);
-    } else {
-      shuffleShlokaNumbers(localDeselectedShlokaNumbers, event.target.id, localAllShlokaNumbers);
-    }
-    setAllShlokaNumbers(localAllShlokaNumbers);
+    // var localAllShlokas = selectedShlokaNumbers;
+    // localAllShlokas.push(...deselectedShlokaNumbers);
+    var localAllShlokas = selectedShlokaNumbers.concat(deselectedShlokaNumbers);
+    
+    localAllShlokas.forEach(localShloka => {
+      if(value.includes(localShloka.split(' ')[0])) {
+        localSelectedShlokaNumbers.push(localShloka);
+      } else {
+        localDeselectedShlokaNumbers.push(localShloka)
+      }
+    });
+
+
+    // if (!event.target.checked) {
+    //   shuffleShlokaNumbers(localSelectedShlokaNumbers, event.target.id, localDeselectedShlokaNumbers);
+    // } else {
+    //   shuffleShlokaNumbers(localDeselectedShlokaNumbers, event.target.id, localSelectedShlokaNumbers);
+    // }
+    setSelectedShlokaNumbers(localSelectedShlokaNumbers);
     setDeselectedShlokaNumbers(localDeselectedShlokaNumbers);
-    setDisplayShlokaNumberButtonFlag(localAllShlokaNumbers.length > 0);
-    setProgressTotalSize(localAllShlokaNumbers.length > 0 ? localAllShlokaNumbers.length : 100);
+    setDisplayShlokaNumberButtonFlag(localSelectedShlokaNumbers.length > 0);
+    setProgressTotalSize(localSelectedShlokaNumbers.length > 0 ? localSelectedShlokaNumbers.length : 100);
     setProgressCurrentSize(0);
   };
 
@@ -261,9 +289,40 @@ const DisplayGita = () => {
     localStorage.setItem("savedDisplayUiState", JSON.stringify(localSavedDisplayUiState));
   }
 
+  const ITEM_HEIGHT = 48;
+  const ITEM_PADDING_TOP = 8;
+  const MenuProps = {
+    PaperProps: {
+      style: {
+        maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+        width: 250,
+      },
+    },
+  };
+
   return (
     <div style={{ marginTop: "20px" }}>
-      {selectBooks.map((selectBook, index) => (
+      <FormControl sx={{ m: 1, minWidth: "40%" }}>
+        <InputLabel id="demo-multiple-checkbox-label">Books</InputLabel>
+        <Select
+          labelId="demo-multiple-checkbox-label"
+          id="demo-multiple-checkbox"
+          multiple
+          value={selectedBooksOnScreen}
+          onChange={onBookSelection}
+          input={<OutlinedInput label="Tag" />}
+          renderValue={(selected) => selected.join(", ")}
+          MenuProps={MenuProps}
+        >
+          {selectBooks.map((name) => (
+            <MenuItem key={name.bookShortCode} value={name.bookShortCode}>
+              <Checkbox checked={name.isSelected} />
+              <ListItemText primary={name.bookName} />
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+      {/* {selectBooks.map((selectBook, index) => (
         <div key={selectBook.bookShortCode}>
           <label style={{ fontWeight: "bold", fontSize: "20px" }}>
             <GreenSwitch type="checkbox" id={selectBook.bookShortCode} checked={selectBook.isSelected} name={selectBook.bookName} onChange={onBookSelection} />
@@ -271,7 +330,7 @@ const DisplayGita = () => {
           </label>
           <br />
         </div>
-      ))}
+      ))} */}
       <br />
       <FormControl sx={{ m: 1, minWidth: "40%" }}>
         <InputLabel id="timeline">Timeline</InputLabel>

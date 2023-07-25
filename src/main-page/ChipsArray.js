@@ -21,6 +21,25 @@ const ChipsArray = ({ totalSelectedShlokaList }) => {
   //     setChipData([...totalSelectedShlokaList]);
   //   };
 
+  const getColour = (bookCode) => {
+
+    var colour = "secondary";
+
+    if(bookCode.startsWith("BG")) {
+      colour = "primary";
+    } else if (bookCode.startsWith("SB")) {
+      colour = "success";
+    } else if (bookCode.startsWith("NOI")) {
+      colour = "error";
+    } else if (bookCode.startsWith("BS")) {
+      colour = "warning";
+    } else if (bookCode.startsWith("ISO")) {
+      colour = "info";
+    }
+    return colour;
+
+  }
+
   return (
     <div>
       <label>
@@ -42,7 +61,7 @@ const ChipsArray = ({ totalSelectedShlokaList }) => {
             <ListItem key={data}>
               <Chip
                 //   icon={icon}
-                color={data.startsWith("BG") ? "primary" : data.startsWith("SB") ? "success" : "secondary"}
+                color={getColour(data)}
                 label={data}
                 //   onDelete={data.label === 'React' ? undefined : handleDelete(data)}
               />
