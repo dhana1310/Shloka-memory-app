@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import useFetchMemorisedShlokas from "./useFetchMemorisedShlokas";
 import parseResponse from "./ParseResponse";
-import { shlokaList, createSequenceList, defaultCurrentSelectedDetails, getDefaultBookName, populateToast, errorCode, defaultUiState, getDefaultBooksList, defaultSelectedBooks, bookCodesWithoutCantos, bookCodesWithCantos } from "./Constants";
+import { shlokaList, createSequenceList, defaultCurrentSelectedDetails, getDefaultBookName, populateToast, errorCode, defaultUiState, homePage, defaultSelectedBooks, bookCodesWithoutCantos, bookCodesWithCantos } from "./Constants";
 import ChipsArray from "./ChipsArray";
 import { Button, Checkbox, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import ShowToast from "./ShowToast";
@@ -207,7 +207,7 @@ const AddToList = () => {
       fileToLoad = "/CC" + "/" + currentSelectedDetails.onScreenCurrentCanto + "/" + currentSelectedDetails.onScreenCurrentChapterNumber + ".txt";
     }
 
-    fetch(fileToLoad)
+    fetch(homePage + fileToLoad)
       .then((r) => r.text())
       .then((text) => {
         const splitLines = text.split("\n");

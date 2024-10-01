@@ -1,4 +1,5 @@
 export const errorCode = "Please add the shlokas first!!";
+export const homePage = "/Shloka-memory-app";
 
 export const defaultSelectedBooks = ["BG", "SB", "CC", "NOI", "BS", "ISO"];
 export const bookCodesWithoutCantos = Array.of("BG", "NOI", "BS", "ISO");

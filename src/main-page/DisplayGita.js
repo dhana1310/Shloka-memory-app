@@ -1,6 +1,6 @@
 import { Box, Button, Card, FormControl, IconButton, InputLabel, LinearProgress, MenuItem, Paper, Select, Typography } from "@mui/material";
 import { useState, useEffect } from "react";
-import { defaultUiState, errorCode, getDefaultBooksList, getDefaultTimeLineName, getDefaultTimeList, populateToast } from "./Constants";
+import { defaultUiState, errorCode, getDefaultBooksList, getDefaultTimeLineName, getDefaultTimeList, populateToast, homePage } from "./Constants";
 import parseResponse from "./ParseResponse";
 import useFetchMemorisedShlokas from "./useFetchMemorisedShlokas";
 import ShowToast from "./ShowToast";
@@ -125,7 +125,7 @@ const DisplayGita = () => {
         fileToLoad = "/" + nextShloka.substring(0, 2) + "/" + nextShloka.split(".")[0].substring(3).split(" ")[0] + "/" + nextShloka.split(".")[0].split(" ")[2] + ".txt";
       }
 
-      fetch(fileToLoad)
+      fetch(homePage + fileToLoad)
         .then((r) => r.text())
         .then((text) => {
           const splitLines = text.split("\n");

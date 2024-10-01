@@ -20,6 +20,9 @@
 # To open the android project in Android studio
 	npx cap open android
 
+# To create Android app using Android studio
+    npm run android
+
 # Sample response json
 `{
 	"allShlokasList": [

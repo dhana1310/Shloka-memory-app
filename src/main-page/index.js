@@ -8,10 +8,11 @@ import AddToList from "./AddToList";
 import DisplayGita from "./DisplayGita";
 import ButtonAppBar from "./ButtonAppBar";
 import JapaPage from "./JapaPage";
+import { homePage } from './Constants'
 
 const App = (props) => {
   return (
-      <Router>
+      <Router basename={homePage}>
         <ButtonAppBar />
         <div className="container">
           <div className="App">
