@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/Shloka-memory-app/static/css/main.756af292.css",
-    "main.js": "/Shloka-memory-app/static/js/main.c2bb6b4d.js",
+    "main.js": "/Shloka-memory-app/static/js/main.9d25c429.js",
     "static/js/651.ae0fa960.chunk.js": "/Shloka-memory-app/static/js/651.ae0fa960.chunk.js",
     "index.html": "/Shloka-memory-app/index.html",
     "main.756af292.css.map": "/Shloka-memory-app/static/css/main.756af292.css.map",
-    "main.c2bb6b4d.js.map": "/Shloka-memory-app/static/js/main.c2bb6b4d.js.map",
+    "main.9d25c429.js.map": "/Shloka-memory-app/static/js/main.9d25c429.js.map",
     "651.ae0fa960.chunk.js.map": "/Shloka-memory-app/static/js/651.ae0fa960.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.756af292.css",
-    "static/js/main.c2bb6b4d.js"
+    "static/js/main.9d25c429.js"
   ]
 }
